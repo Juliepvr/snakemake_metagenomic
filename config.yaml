@@ -1,0 +1,4 @@
+path_DB: "/PATH/TO/YOUR/DATABASE.dmnd"
+path_annot: "/PATH/TO/ANNOTATION/kegg_flatfiles/"
+path_resf: "/PATH/TO/resfinder_names.txt"
+seq_len: 150
