@@ -1,0 +1,377 @@
+---
+title: "DEX metagenomics"
+author: "Julie Pevernagie"
+date: "May 2019"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, error=FALSE, message=FALSE)
+################################################################################
+# Packages
+################################################################################
+# see what packages are installed, and which needed
+pkg <- installed.packages()[, "Package"]
+
+loadpkg <- c("shiny","vegan","RColorBrewer","gplots", "ggplot2", "stringr",
+             "DESeq2","ggrepel","SummarizedExperiment") 
+
+# install pkg if necessary
+for ( i in 1:length(loadpkg) ){
+  if(!(loadpkg[i] %in% pkg)) {
+    install.packages(loadpkg[i]) 
+  }
+}
+# load the required packages
+lapply(loadpkg, library, character.only = TRUE)
+
+```
+
+# Differential Expression in metagenomic samples
+
+```{r echo = FALSE}
+
+################################################################################
+# Data
+################################################################################
+# set working directory
+setwd("C:/Users/- Julie -/Documents/BIT/Roslin stage/project")
+#setwd("/exports/cmvm/eddie/eb/groups/watson_grp/julie_test_snakemake/pig_vs_chicken")
+
+# Load the data
+samples <- dir(path = "10_annotation/")
+
+#protein <- dir(path = "." , recursive = TRUE, pattern="counts_protein")
+pathway <- dir(path = "." , recursive = TRUE, pattern="counts_path")
+enzyme <- dir(path = "." , recursive = TRUE, pattern="counts_enz")
+cazy <- dir(path = "." , recursive = TRUE, pattern="counts_cazy")
+
+# rows: all info for 1 sample -> j is sample
+# cols : all samples for 1 kind of info -> i is type of info
+all <- data.frame(pathway, enzyme, cazy)
+
+# read the files and assign them 
+# e.g. protein_1 <- (first protein file)
+# eval(parse(text= for reading string as if variable
+
+for(i in 1:length(all)){
+  for(j in 1:length(all[,i])){
+    # assign file content
+    assign(paste0(colnames(all)[i],"_",j) , 
+           read.table(file = as.character(all[j,i]), sep = "\t", header = F, 
+                      col.names=c("V1", samples[j]) ))
+    if(j == 1){
+      assign(paste0(colnames(all)[i],"_counts"), 
+             eval(parse(text=paste0(colnames(all)[i],"_",j))))
+    } else {
+      assign(paste0(colnames(all)[i],"_counts"), 
+             merge(eval(parse(text=paste0(colnames(all)[i],"_counts"))),
+                   eval(parse(text=paste0(colnames(all)[i],"_",j))),by="V1", 
+                   all = F)) # all = T ==> keep zeroes ==> 7 more DEX , prettier heatmap
+      
+    }
+  }}
+
+# result: protein_couts, pathway_counts, enzyme_counts, cazy counts
+
+# metadata
+species <- c(replicate(5,"chicken"),replicate(5,"pig"))
+
+################################################################################
+# Functions
+################################################################################
+# set first column as rownames and delete first column, replace NA values by 0
+
+col1_as_rownames <- function(df){
+  df[is.na(df)] <- 0
+  rownames(df) <- df$V1
+  df <- df[, -1]
+}
+
+################################################################################
+# edit plotPCA, added jitter, labels and changed theme
+
+plotPCA.2 <- function(object, intgroup = "condition", ntop = 500, 
+                      returnData = FALSE){
+  rv <- rowVars(assay(object))
+  select <- order(rv, decreasing = TRUE)[seq_len(min(ntop, 
+                                                     length(rv)))]
+  pca <- prcomp(t(assay(object)[select, ]))
+  percentVar <- pca$sdev^2/sum(pca$sdev^2)
+  if (!all(intgroup %in% names(colData(object)))) {
+    stop("the argument 'intgroup' should specify columns of colData(dds)")
+  }
+  intgroup.df <- as.data.frame(colData(object)[, intgroup, 
+                                               drop = FALSE])
+  group <- if (length(intgroup) > 1) {
+    factor(apply(intgroup.df, 1, paste, collapse = ":"))
+  }
+  else {
+    colData(object)[[intgroup]]
+  }
+  d <- data.frame(PC1 = pca$x[, 1], PC2 = pca$x[, 2], group = group, 
+                  intgroup.df, name = colnames(object))
+  if (returnData) {
+    attr(d, "percentVar") <- percentVar[1:2]
+    return(d)
+  }
+  ggplot(data = d, 
+         aes_string(x = "PC1", y = "PC2", color = "group")) + 
+    geom_point(size = 3, position = "jitter") + 
+    xlab(paste0("PC1: ", round(percentVar[1] * 100), "% variance")) + 
+    ylab(paste0("PC2: ", round(percentVar[2] * 100), "% variance")) + 
+    coord_fixed() +
+    labs(title = "PCA") +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    geom_text_repel(aes(label=(1:length(d$name))))
+}
+################################################################################
+
+# visualize counts: diff expr analysis for comparing between 2 groups,
+#   library size (before norm.) in barplot, PCA and heatmap
+# create results table (tsv)
+# cts = counts dataframe, samples --> columns, rows --> attributes, no NA!
+# metadata = df with the sample name and 2 conditions to compare in second column
+# savepath: path to save, with trailing slash
+
+# WF:
+
+# 1) inspect library size ; return coldata --> lib size + metadata in df
+get_coldata <-  function(cts, metadata){
+  # plot library sizes
+  libsize <- colSums(cts)
+  coldata <- cbind(as.data.frame(libsize), as.data.frame(metadata))
+  return(coldata)
+}
+
+plot_lib_size <-  function(coldata){
+  col.group <- coldata$metadata
+  levels(col.group) <- RColorBrewer::brewer.pal(2,"Paired")
+  par(mar=c(12,4,8,4))
+  bp <- barplot(coldata$libsize*1e-6,
+                main = "Library sizes",
+                ylab = "Library size (millions)",
+                col = as.character(col.group))
+  axis(1, labels = rownames(coldata), 
+       at = bp, las = 2, cex.axis = 1)
+}
+  
+# 2) rarefy for equal library sizes
+equal_lib_sizes <- function(cts, coldata){
+  smallest <- min(colSums(cts))
+  # transpose for rrarefy
+  cts <- t(cts)
+  cts <- rrarefy(cts, smallest)
+  # transpose again for rest of workflow
+  cts <- t(cts)
+  return(cts)
+  }
+  
+# 3) DESeq operations and prefiltering
+diff_expr <- function(cts, coldata){
+  dds <- DESeqDataSetFromMatrix(countData = cts,
+                                colData = coldata,
+                                design= ~ metadata)
+  #Pre-filtering
+  keep <- rowSums(counts(dds)) >= 5000 # ~ at least a 1000 in 5 samples 
+  dds <- dds[keep,]
+  # DESeq
+  dds <- DESeq(dds)
+  return(dds)
+  }
+  
+# 4) PCA plot and vst
+pca_plotter <- function(dds){
+  # estimate dispersion trend and apply a 
+  # variance stabilizing transformation
+  # blind=FALSE --> make full use of the design information 
+  vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
+  #par(mar=c(4,4,4,4))
+  plotPCA.2(vsd, intgroup= "metadata")
+  return(vsd)
+  }
+  
+# 5) results
+  # results()
+
+# 6) Significant counts
+get_sgnf<- function(dds,res,lfc,padj){
+  df <- as.data.frame(colData(dds)[,("metadata")])
+  # as dataframe instead of object, for easier working
+  resDF <- as.data.frame(res)
+  # keep significant 
+  resDF <- resDF[(abs(resDF$log2FoldChange) > lfc) & (resDF$padj < padj),]
+  # results in NA rows coming from NA in padj ? ; remove them:
+  resDF <- na.omit(resDF)
+  
+  # order by lfc
+  resDF<-resDF[order(resDF$log2FoldChange),]
+  # get significant counts
+  sgnf <- counts(dds)[rownames(resDF),]
+  return(sgnf)
+}
+
+# 7) heatmap
+draw_heatmap<- function(sgnf,col.pal){
+  # correlation columns and rows as dendrograms
+  rowd <- as.dendrogram(hclust(as.dist(1-cor(t(sgnf)))))
+  cold <- as.dendrogram(hclust(as.dist(1-cor(sgnf))))
+  
+  # by scaling rows ==> abundance of specific pathway taken into account
+  heatmap.2(sgnf, 
+            Rowv=rowd, 
+            Colv=cold, 
+            scale="row", 
+            trace="none", 
+            key=FALSE, 
+            col = col.pal,
+            margins = c(15,15),
+            cexRow = 1.5,
+            cexCol = 1.5,
+            srtCol = 45, # angle for col labels
+            lhei = c(0.05,1)
+  )
+
+  # add names!
+  }
+```
+
+```{r}
+################################################################################
+# Create images
+################################################################################
+
+# User input: choose the aspect to inspect
+inputPanel(
+  selectInput("cts", label = "Select aspect",
+              choices = colnames(all), selected = colnames(all)[1])
+  )
+
+# get a counts dataframe for the chosen aspect
+cts <- reactive({
+  x <- paste0(input$cts,"_counts")
+  x <- eval(parse(text=x))
+  return(col1_as_rownames(x))
+  })
+
+# create coldata containing library size and metadata
+coldata <- reactive({
+  return(get_coldata(cts(), species))
+  })
+```
+
+``` {r}
+# draw a barplot of the library sizes
+renderPlot({
+  plot_lib_size(coldata())
+  }, width = 800, height = 600)
+
+# rarefy cts for equal library sizes
+rcts <- reactive({
+  return(equal_lib_sizes(cts(), coldata()))
+  })
+
+# DESeq operations and prefiltering
+dds <- reactive({
+  return(diff_expr(rcts(), coldata()))
+  })
+```
+
+###### doesn't work
+renderPlot({
+  pca_plotter(dds())
+}, width = 800, height = 600)
+
+
+``` {r}
+# 4) variance and PCA plot
+vsd <- reactive({
+  return(varianceStabilizingTransformation(dds(), blind=FALSE))
+  })
+
+renderPlot({
+  plotPCA.2(vsd(), intgroup= "metadata")
+  }, width = 800, height = 600)
+
+# 5) results
+# alpha = cutoff padj
+res <- reactive({
+  results(dds(), name="metadata_pig_vs_chicken", alpha=0.05, 
+               contrast=c("metadata", "chicken", "pig")) 
+  })
+
+# Show results
+resOrdered <- reactive({
+  x <- res()
+  return(x[order(x$padj),])
+  })
+
+reactive({head(resOrdered())})
+
+
+# blue to red color palette
+col.pal <- colorRampPalette(c("#0d50b2", 
+                                      "white", 
+                                      "#c5081a"))(n = 200)
+sgnf <- reactive({
+  return(get_sgnf(dds(),res(),1,0.05))
+})
+```
+
+## Number of differential expressed elements:
+``` {r}
+reactive({print(nrow(sgnf()))})
+```
+Upregulated in group 1:
+``` {r}
+reactive({
+  resDF <- as.data.frame(res())
+  print(nrow(resDF[(resDF$log2FoldChange > 1) & (resDF$padj < 0.05),]))
+})
+```
+Upregulated in group 2:
+``` {r}
+reactive({
+  resDF <- as.data.frame(res())
+  print(nrow(resDF[(resDF$log2FoldChange < -1) & (resDF$padj < 0.05),]))
+})
+```
+
+
+``` {r}
+
+# 6) Heatmap
+renderPlot({
+
+  draw_heatmap(sgnf(),col.pal)
+},width = 800, height = reactive({800/30*nrow(sgnf())}) )
+
+
+```
+
+Check out individual elements:
+``` {r}
+# User input: choose the aspect to inspect
+rows <- reactive({
+  x <- as.data.frame(cts())
+  y <- rownames(x)
+  return(y)
+})
+``` 
+
+``` {r}
+inputPanel(
+  renderUI({
+  selectInput("el", label = "Select element",
+              choices = rows(), 
+              selected = rows()[1]
+              )})
+  )
+
+renderPlot({
+  plotCounts(dds(), gene=input$el, intgroup="metadata")
+},width = 800, height = 600 )
+
+```

@@ -13,6 +13,7 @@ This directory should contain:
 # STEP 2: create the base conda environment
 
 requires anaconda (https://www.anaconda.com/)
+
 `$ conda env create -f envs/env.yaml `
 
 # STEP 3 : Start a terminal multiplexer 
@@ -24,10 +25,13 @@ e.g. `$ tmux new -s snakemake `
 make sure you are in the right directory and 
 
 run the pipeline as a whole:
+
 `$ conda activate meta-assembly `
+
 `$ snakemake --use-conda --cores <int> `
 
 or  submit jobs to the server (adviseable with lots of samples):
+
 `$ ./runjob.sh `
 
 # STEP 5 : Sit back and relax! 

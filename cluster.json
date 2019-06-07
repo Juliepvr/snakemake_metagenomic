@@ -1,0 +1,147 @@
+{
+
+    "__default__" :
+
+    {
+
+        "core" : "4",
+
+        "time" : "02:00:00",
+
+        "vmem" : "8G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "trim" :
+
+    {
+
+        "core" : "8",
+
+        "time" : "02:00:00",
+
+        "vmem" : "16G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+
+    "assemble" :
+
+    {
+
+        "core" : "16",
+
+        "time" : "12:00:00",
+
+        "vmem" : "16G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "align" :
+
+    {
+
+        "core" : "8",
+
+        "time" : "12:00:00",
+
+        "vmem" : "4G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "binning" :
+
+    {
+
+        "core" : "8",
+
+        "time" : "12:00:00",
+
+        "vmem" : "8G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "checkm_lineage" :
+
+    {
+
+        "core" : "16",
+
+        "time" : "12:00:00",
+
+        "vmem" : "16G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "predict" :
+
+    {
+
+        "core" : "4",
+
+        "time" : "02:00:00",
+
+        "vmem" : "4G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "diamond_kegg" :
+
+    {
+
+        "core" : "8",
+
+        "time" : "08:00:00",
+
+        "vmem" : "16G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "makedb" :
+
+    {
+
+        "core" : "16",
+
+        "time" : "06:00:00",
+
+        "vmem" : "16G",
+
+        "proj" : "roslin_faang"
+
+    },
+
+    "blastx" :
+
+    {
+
+        "core" : "16",
+
+        "time" : "08:00:00",
+
+        "vmem" : "16G",
+
+        "proj" : "roslin_faang"
+
+    }
+
+}
+
+
+
