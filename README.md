@@ -30,7 +30,7 @@ run the pipeline as a whole:
 
 `$ snakemake --use-conda --cores <int> `
 
-or  submit jobs to the server (adviseable with lots of samples):
+or  submit jobs to the server (advisable with lots of samples):
 
 `$ ./runjob.sh `
 
