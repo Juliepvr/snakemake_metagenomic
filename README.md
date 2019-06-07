@@ -4,7 +4,7 @@ This directory should contain:
 - **"data"** : either a link called "data", to the fastq files ; or a directory called "data" , containing the fastq files
 - **"envs"** : a directory containing the conda environments env.yaml and checkm.yaml
 - **"scripts"** : a directoy containing the python scripts to be used by snakemake
-- *"config.yaml"* : a file containing paths to a db, annotation files and sequence length, adjust this to your own data
+- *"config.yaml"* : a file containing paths to a database.dmnd (created with diamond makedb) annotation files and sequence length, adjust this to your own data
 - *"Snakefile"* : the snakefile itself, a seperate one in this case with specified threads per task
 - *"cluster.json"* : a file containing the specifications per task, such as time allowed to run, nr of cores, project, ...
 - *"custombash.sh"* : a bash script to setup the environment on a cluster
