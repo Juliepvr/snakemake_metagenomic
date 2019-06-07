@@ -36,13 +36,11 @@ lapply(loadpkg, library, character.only = TRUE)
 # Data
 ################################################################################
 # set working directory
-setwd("C:/Users/- Julie -/Documents/BIT/Roslin stage/project")
-#setwd("/exports/cmvm/eddie/eb/groups/watson_grp/julie_test_snakemake/pig_vs_chicken")
+setwd("/path/to/your/snakemake/directory")
 
 # Load the data
 samples <- dir(path = "10_annotation/")
 
-#protein <- dir(path = "." , recursive = TRUE, pattern="counts_protein")
 pathway <- dir(path = "." , recursive = TRUE, pattern="counts_path")
 enzyme <- dir(path = "." , recursive = TRUE, pattern="counts_enz")
 cazy <- dir(path = "." , recursive = TRUE, pattern="counts_cazy")
@@ -76,7 +74,8 @@ for(i in 1:length(all)){
 # result: protein_couts, pathway_counts, enzyme_counts, cazy counts
 
 # metadata
-species <- c(replicate(5,"chicken"),replicate(5,"pig"))
+# !!! SPECIFY THE CONDITIONS TO COMPARE, MUST MATCH ALPHABETICAL ORDER OF SAMPLES !!!
+#species <- c()
 
 ################################################################################
 # Functions
@@ -183,15 +182,11 @@ diff_expr <- function(cts, coldata){
   }
   
 # 4) PCA plot and vst
-pca_plotter <- function(dds){
   # estimate dispersion trend and apply a 
   # variance stabilizing transformation
   # blind=FALSE --> make full use of the design information 
-  vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
-  #par(mar=c(4,4,4,4))
-  plotPCA.2(vsd, intgroup= "metadata")
-  return(vsd)
-  }
+  #vsd <- varianceStabilizingTransformation(dds, blind=FALSE)
+  #plotPCA.2(vsd, intgroup= "metadata")
   
 # 5) results
   # results()
@@ -233,8 +228,6 @@ draw_heatmap<- function(sgnf,col.pal){
             srtCol = 45, # angle for col labels
             lhei = c(0.05,1)
   )
-
-  # add names!
   }
 ```
 
@@ -279,12 +272,6 @@ dds <- reactive({
   })
 ```
 
-###### doesn't work
-renderPlot({
-  pca_plotter(dds())
-}, width = 800, height = 600)
-
-
 ``` {r}
 # 4) variance and PCA plot
 vsd <- reactive({
@@ -298,8 +285,8 @@ renderPlot({
 # 5) results
 # alpha = cutoff padj
 res <- reactive({
-  results(dds(), name="metadata_pig_vs_chicken", alpha=0.05, 
-               contrast=c("metadata", "chicken", "pig")) 
+  results(dds(), name="metadata_cond1_vs_cond2", alpha=0.05, 
+               contrast=c("metadata", "cond1", "cond2")) 
   })
 
 # Show results
