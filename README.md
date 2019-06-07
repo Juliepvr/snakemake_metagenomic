@@ -10,14 +10,21 @@ This directory should contain:
 - *"custombash.sh"* : a bash script to setup the environment on the cluster
 - *"runjob.sh"* : the script containing the command to send the snakemake jobs to a cluster via qsub, check if the commands match these for the server you are working on
 
-# STEP 2 : Start a terminal multiplexer 
+# STEP 2: create the base conda environment
+
+requires anaconda (https://www.anaconda.com/)
+`$ conda env create -f envs/env.yaml `
+
+# STEP  : Start a terminal multiplexer 
 
 e.g. `$ tmux new -s snakemake `
 
 # STEP 3 : Start the job 
 
-make sure you are in the right directory and run: 
+make sure you are in the right directory and 
+
 run the pipeline as a whole:
+`$ conda activate meta-assembly `
 `$ snakemake --use-conda --cores <int> `
 
 or  submit jobs to the server (adviseable with lots of samples):
