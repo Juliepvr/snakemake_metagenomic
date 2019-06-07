@@ -7,8 +7,9 @@ This directory should contain:
 - *"config.yaml"* : a file containing paths to a db, annotation files and sequence length, adjust this to your own data
 - *"Snakefile"* : the snakefile itself, a seperate one in this case with specified threads per task
 - *"cluster.json"* : a file containing the specifications per task, such as time allowed to run, nr of cores, project, ...
-- *"custombash.sh"* : a bash script to setup the environment on the cluster
+- *"custombash.sh"* : a bash script to setup the environment on a cluster
 - *"runjob.sh"* : the script containing the command to send the snakemake jobs to a cluster via qsub, check if the commands match these for the server you are working on
+- *"adapters.fa"* : a fasta file containing the adapters to be trimmed
 
 # STEP 2: create the base conda environment
 
