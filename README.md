@@ -1,7 +1,7 @@
 # STEP 1 : Setup directory to run snakemake. 
 
 This directory should contain: 
-- **"data"** : either a link called "data", to the fastq files ; or a directory called "data" , containing the fastq files
+- **"data"** : either a link called "data", to the fastq files ; or a directory called "data" , containing the fastq files; format {sample}_1.fastq.gz and {sample}_2.fastq.gz
 - **"envs"** : a directory containing the conda environments env.yaml and checkm.yaml
 - **"scripts"** : a directory containing the python scripts to be used by snakemake
 - *"config.yaml"* : a file containing paths to a database.dmnd (created with diamond makedb, see https://github.com/bbuchfink/diamond) annotation files and sequence length, adjust this to your own data
