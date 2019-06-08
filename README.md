@@ -3,7 +3,7 @@
 This directory should contain: 
 - **"data"** : either a link called "data", to the fastq files ; or a directory called "data" , containing the fastq files
 - **"envs"** : a directory containing the conda environments env.yaml and checkm.yaml
-- **"scripts"** : a directoy containing the python scripts to be used by snakemake
+- **"scripts"** : a directory containing the python scripts to be used by snakemake
 - *"config.yaml"* : a file containing paths to a database.dmnd (created with diamond makedb) annotation files and sequence length, adjust this to your own data
 - *"Snakefile"* : the snakefile itself, containing the tasks and their execution order
 - *"cluster.json"* : a file containing the specifications per task, such as time allowed to run, nr of cores, project, ...
@@ -25,15 +25,15 @@ e.g. `$ tmux new -s snakemake `
 
 make sure you are in the right directory and 
 
-run the pipeline as a whole:
+- run the pipeline as a whole:
 
-`$ conda activate meta-assembly `
+	`$ conda activate meta-assembly `
 
-`$ snakemake --use-conda --cores <int> `
+	`$ snakemake --use-conda --cores <int> `
 
-or  submit jobs to the server (advisable with lots of samples):
+- or  submit jobs to the server (advisable with lots of samples):
 
-`$ ./runjob.sh `
+	`$ ./runjob.sh `
 
 # STEP 5 : Sit back and relax! 
 Maybe book a cruise to the carribean, you deserve it
