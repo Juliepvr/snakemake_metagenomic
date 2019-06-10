@@ -284,14 +284,14 @@ rule annotate_blastP:
 rule count_blastX:
     input:
         m8="09_diamond_blastX/{sample}/{sample}_blastx_matches_reads.m8",
-        sl=SEQ_LEN,
         need="10_annotation/{sample}/{sample}_summary.tsv"
     output:
         "10_annotation/{sample}/{sample}_counts_protein"
     params:
-        dir="10_annotation/{sample}/{sample}_"
+        dir="10_annotation/{sample}/{sample}_",
+        sl=SEQ_LEN
     shell:
-        "scripts/count_annotate.py {input.m8} {params.dir} {input.sl} "
+        "scripts/count_annotate.py {input.m8} {params.dir} {params.sl}"
 
 ################################################################################
 # 14) Look for AMR genes using ABRicate
