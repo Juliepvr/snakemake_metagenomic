@@ -1,3 +1,8 @@
+Metagenomic analysis is generally time consuming and requires the implementation of multiple tools. A pipeline stitching the different steps together and allowing the jobs to run in parallel would be time-saving and guarantee the exact same process for every sample.
+Using a subset of an Illumina HiSeq 3000 dataset, generated from 359 European pig herds’ and poultry flocks’ gut microbiomes, a bioinformatics pipeline for metagenomic analysis was developed. Using conda environments and Snakemake, all steps from quality control to genome binning and annotation were incorporated. Because of their significance in the food chain, detection of antimicrobial resistance genes was also included. By inspecting pathways, enzymes and CAZymes, a clearer understanding of the gut microbiome is intended. 
+User friendliness was guaranteed by using conda. Apart from anaconda, no installations are required.
+The pipeline was designed for use with metagenomic, paired-end, short read sequences.
+
 # STEP 1 : Setup directory to run snakemake. 
 
 This directory should contain: 
