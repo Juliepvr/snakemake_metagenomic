@@ -7,6 +7,8 @@ Using a subset of an Illumina HiSeq 3000 dataset, generated from 359 European pi
 User friendliness was guaranteed by using conda. Apart from anaconda, no installations are required.
 The pipeline was designed for use with metagenomic, paired-end, short read sequences.
 
+An internet connection and at least 35Gb of RAM memory are necessary.
+
 ## STEP 1 : Setup directory to run snakemake. 
 
 This directory should contain: 
