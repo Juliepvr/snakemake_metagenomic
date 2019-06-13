@@ -1,3 +1,5 @@
+# Reproducible Snakemake pipelines for metagenomic analysis in farm animals
+
 Metagenomic analysis is generally time consuming and requires the implementation of multiple tools. A pipeline stitching the different steps together and allowing the jobs to run in parallel would be time-saving and guarantee the exact same process for every sample.
 
 Using a subset of an Illumina HiSeq 3000 dataset, generated from 359 European pig herds’ and poultry flocks’ gut microbiomes, a bioinformatics pipeline for metagenomic analysis was developed. Using conda environments and Snakemake, all steps from quality control to genome binning and annotation were incorporated. Because of their significance in the food chain, detection of antimicrobial resistance genes was also included. By inspecting pathways, enzymes and CAZymes, a clearer understanding of the gut microbiome is intended. 
@@ -5,7 +7,7 @@ Using a subset of an Illumina HiSeq 3000 dataset, generated from 359 European pi
 User friendliness was guaranteed by using conda. Apart from anaconda, no installations are required.
 The pipeline was designed for use with metagenomic, paired-end, short read sequences.
 
-# STEP 1 : Setup directory to run snakemake. 
+## STEP 1 : Setup directory to run snakemake. 
 
 This directory should contain: 
 - **"data"** : either a link called "data", to the fastq files ; or a directory called "data" , containing the fastq files; format {sample}_1.fastq.gz and {sample}_2.fastq.gz
@@ -18,17 +20,17 @@ This directory should contain:
 - *"runjob.sh"* : the script containing the command to send the snakemake jobs to a cluster via qsub, check if the commands match these for the server you are working on
 - *"adapters.fa"* : a fasta file containing the adapters to be trimmed
 
-# STEP 2: create the base conda environment
+## STEP 2: create the base conda environment
 
 requires anaconda (https://www.anaconda.com/)
 
 `$ conda env create -f envs/env.yaml `
 
-# STEP 3 : Start a terminal multiplexer 
+## STEP 3 : Start a terminal multiplexer 
 
 e.g. `$ tmux new -s snakemake `
 
-# STEP 4 : Start the job 
+## STEP 4 : Start the job 
 
 make sure you are in the right directory and 
 
@@ -42,7 +44,7 @@ make sure you are in the right directory and
 
 	`$ ./runjob.sh `
 
-# STEP 5 : Sit back and relax! 
+## STEP 5 : Sit back and relax! 
 Maybe book a cruise to the carribean, you deserve it
 
       _                   .-=-.          .-==-.
