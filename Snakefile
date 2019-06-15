@@ -17,7 +17,7 @@ SEQ_LEN=config['seq_len']
 
 rule all:
     input:
-        expand("10_annotation/{sample}/{sample}_counts_AMR.tsv", sample=SAMPLES),
+        expand("10_annotation/{sample}/{sample}_summary_AMR.tsv", sample=SAMPLES),
         expand("06_checkm_result/{sample}/qa_result_checkm.tsv", sample=SAMPLES),
         "01_fastqc/multiqc_report.html"
 
@@ -309,11 +309,10 @@ rule abricate:
 ################################################################################
 rule amr:
     input:
-        cts="10_annotation/{sample}/{sample}_counts_protein",
         amr="11_AMR/{sample}/{sample}_AMR.tsv",
         resf=PATH_RESF
     output:
-        tsv="10_annotation/{sample}/{sample}_counts_AMR.tsv"
+        tsv="10_annotation/{sample}/{sample}_summary_AMR.tsv"
     shell:
-        "scripts/count_amr.py {input.cts} {input.amr} {input.resf} {output.tsv}"
+        "scripts/presence_amr.py {input.amr} {input.resf} {output.tsv}"
 
