@@ -35,7 +35,7 @@ file_out = args.file_out
 # create dictionary from file with 2 columns {col1: [col2(a),col2(b)],...}
 def dict_maker(fileObj):
     D = {}
-    temp=""
+    temp=''
     multi=[]
     lines = fileObj.readlines()
     lines.sort()
@@ -59,7 +59,7 @@ resfinder = dict_maker(resf)
 # make dictionary with AMR info, storing { 'kxxx': ['gene', 'gene', ..],...}
 # edit dict_maker for abricate results
 amr_info = {}
-temp=""
+temp=''
 multi=[]
 amr_list = amr.readlines()
 # remove first line with headers:
@@ -79,11 +79,11 @@ for line in amr_list:
             amr_info[seq] = multi
     temp=seq
 
+# make list of unique ab resistance
+unique_ab=[]
 with file_out as smm:
     # write tsv with counts
     result_writer = csv.writer(smm,delimiter='\t', lineterminator = '\n')
-    # header row
-    result_writer.writerow(["protein_ID","AMR_gene", "resistance"])
     for k in amr_info.keys():
         # amr_info[k] is a list , iterate over it:
         for gene in amr_info[k]:
@@ -92,7 +92,14 @@ with file_out as smm:
             resfinder.setdefault(gene_fam,"NULL")
             # [0] because dict_maker returns list, list NA in this case, want first element
             ab=resfinder[gene_fam][0]
+            if ab not in unique_ab:
+                unique_ab.append(ab)
             line = [k, gene, ab ]
             result_writer.writerow(line)
 smm.close()
 
+file_AB = open(file_out.name + "_AB.txt", "w")
+for _ in unique_ab:
+    file_AB.write( _ + "\n")
+    
+file_AB.close()
