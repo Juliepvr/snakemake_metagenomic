@@ -1,4 +1,4 @@
-name: checkm_remove_test
+name: checkm
 channels:
   - conda-forge
   - bioconda
